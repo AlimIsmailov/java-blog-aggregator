@@ -2,32 +2,46 @@ package cz.jiripinkas.jba.entity;
 
 import java.util.List;
 
+import javax.persistence.CascadeType;
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
 import javax.persistence.OneToMany;
+import javax.validation.constraints.Size;
 
+import org.hibernate.validator.constraints.Email;
+
+import cz.jiripinkas.jba.annotation.UniqueUsername;
 
 @Entity
 public class User {
-	
+
 	@Id
 	@GeneratedValue
 	private Integer id;
-	
+
+	@Size(min = 3, message = "Name must be at least 3 characters!")
+	@Column(unique = true)
+	@UniqueUsername(message = "Such uername already exists!")
 	private String name;
-	
+
+	@Size(min = 1, message = "Invalid email!")
+	@Email(message = "Email must be: example@mail.com")
 	private String email;
-	
+
+	@Size(min = 5, message = "Name must be at least 5 characters!")
 	private String password;
-	
+
+	private boolean enabled;
+
 	@ManyToMany
 	@JoinTable
 	private List<Role> roles;
-	
-	@OneToMany(mappedBy="user")
+
+	@OneToMany(mappedBy = "user", cascade = CascadeType.REMOVE)
 	private List<Blog> blogs;
 
 	public String getName() {
@@ -77,6 +91,13 @@ public class User {
 	public void setBlogs(List<Blog> blogs) {
 		this.blogs = blogs;
 	}
-	
-	
+
+	public boolean isEnabled() {
+		return enabled;
+	}
+
+	public void setEnabled(boolean enabled) {
+		this.enabled = enabled;
+	}
+
 }

@@ -1,17 +1,16 @@
 package cz.jiripinkas.jba.service;
 
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 import javax.annotation.PostConstruct;
 import javax.transaction.Transactional;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import cz.jiripinkas.jba.entity.Blog;
-import cz.jiripinkas.jba.entity.Item;
 import cz.jiripinkas.jba.entity.Role;
 import cz.jiripinkas.jba.entity.User;
 import cz.jiripinkas.jba.repository.BlogRepository;
@@ -35,6 +34,8 @@ public class InitDbService {
 	@Autowired
 	private ItemRepository itemRepository;
 
+	BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
+
 	@PostConstruct
 	public void init() {
 		Role roleUser = new Role();
@@ -46,12 +47,23 @@ public class InitDbService {
 		roleRepository.save(roleAdmin);
 
 		User userAdmin = new User();
+		userAdmin.setEnabled(true);
 		userAdmin.setName("admin");
+		userAdmin.setPassword(encoder.encode("admin"));
 		List<Role> roles = new ArrayList<Role>();
 		roles.add(roleAdmin);
 		roles.add(roleUser);
 		userAdmin.setRoles(roles);
 		userRepository.save(userAdmin);
+
+		User userUser = new User();
+		userUser.setEnabled(true);
+		userUser.setName("user");
+		userUser.setPassword(encoder.encode("user"));
+		List<Role> usersRoles = new ArrayList<Role>();
+		usersRoles.add(roleUser);
+		userUser.setRoles(usersRoles);
+		userRepository.save(userUser);
 
 		Blog blogJavavids = new Blog();
 		blogJavavids.setName("JavaVids");
@@ -59,7 +71,13 @@ public class InitDbService {
 		blogJavavids.setUser(userAdmin);
 		blogRepository.save(blogJavavids);
 
-		Item item1 = new Item();
+		Blog blogToUser = new Blog();
+		blogToUser.setName("Google");
+		blogToUser.setUrl("https://www.google.com.ua/?gws_rd=ssl");
+		blogToUser.setUser(userUser);
+		blogRepository.save(blogToUser);
+
+/*		Item item1 = new Item();
 		item1.setBlog(blogJavavids);
 		item1.setTitle("first");
 		item1.setLink("http://www.javavids.com");
@@ -73,5 +91,12 @@ public class InitDbService {
 		item2.setPublishedDate(new Date());
 		itemRepository.save(item2);
 
+		Item item3 = new Item();
+		item3.setBlog(blogToUser);
+		item3.setTitle("first");
+		item3.setLink("link");
+		item3.setPublishedDate(new Date());
+		itemRepository.save(item3);
+*/
 	}
 }
